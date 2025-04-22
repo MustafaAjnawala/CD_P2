@@ -226,7 +226,8 @@ operation_definition:
         if (!add_symbol($2, TYPE_OPERATION, line)) {
             semantic_errors++;
         }
-        gen_quad("OPERATION", $1, $2, "-");
+        char* temp = new_temp();
+        gen_quad("OPERATION", $1, $2, temp);
     }
     ;
 
@@ -246,16 +247,20 @@ selection:
 
 field:
     IDENTIFIER {
-        gen_quad("FIELD", $1, "-", "-");
+        char* temp = new_temp();
+        gen_quad("FIELD", $1, "-", temp);
     }
     | IDENTIFIER selection_set {
-        gen_quad("FIELD", $1, "NESTED", "-");
+        char* temp = new_temp();
+        gen_quad("FIELD", $1, "NESTED", temp);
     }
     | IDENTIFIER COLON IDENTIFIER {
-        gen_quad("ALIAS", $1, $3, "-");
+        char* temp = new_temp();
+        gen_quad("ALIAS", $1, $3, temp);
     }
     | IDENTIFIER LPAREN argument_list RPAREN {
-        gen_quad("FIELD_ARGS", $1, "-", "-");
+        char* temp = new_temp();
+        gen_quad("FIELD_ARGS", $1, "-", temp);
     }
     ;
 
@@ -308,10 +313,10 @@ fragment_definition:
         if (!add_symbol($2, TYPE_FRAGMENT, line)) {
             semantic_errors++;
         }
-        gen_quad("FRAGMENT", $2, $4, "-");
+        char* temp = new_temp();
+        gen_quad("FRAGMENT", $2, $4, temp);
     }
     ;
-
 
 fragment_spread:
     ELLIPSIS IDENTIFIER {
@@ -320,7 +325,8 @@ fragment_spread:
                     line, $2);
             semantic_errors++;
         }
-        gen_quad("SPREAD", $2, "-", "-");
+        char* temp = new_temp();
+        gen_quad("SPREAD", $2, "-", temp);
     }
     ;
 

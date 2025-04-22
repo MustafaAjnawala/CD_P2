@@ -626,10 +626,10 @@ static const yytype_int8 yyrhs[] =
 static const yytype_uint16 yyrline[] =
 {
        0,   196,   196,   209,   210,   214,   215,   219,   220,   221,
-     225,   234,   238,   239,   243,   244,   248,   251,   254,   257,
-     263,   264,   268,   272,   273,   274,   275,   276,   277,   278,
-     279,   283,   284,   288,   289,   293,   297,   298,   302,   303,
-     307,   317
+     225,   235,   239,   240,   244,   245,   249,   253,   257,   261,
+     268,   269,   273,   277,   278,   279,   280,   281,   282,   283,
+     284,   288,   289,   293,   294,   298,   302,   303,   307,   308,
+     312,   322
 };
 #endif
 
@@ -1616,76 +1616,83 @@ yyreduce:
         if (!add_symbol((yyvsp[(2) - (3)].sval), TYPE_OPERATION, line)) {
             semantic_errors++;
         }
-        gen_quad("OPERATION", (yyvsp[(1) - (3)].sval), (yyvsp[(2) - (3)].sval), "-");
+        char* temp = new_temp();
+        gen_quad("OPERATION", (yyvsp[(1) - (3)].sval), (yyvsp[(2) - (3)].sval), temp);
     ;}
     break;
 
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 248 "parser.y"
+#line 249 "parser.y"
     {
-        gen_quad("FIELD", (yyvsp[(1) - (1)].sval), "-", "-");
+        char* temp = new_temp();
+        gen_quad("FIELD", (yyvsp[(1) - (1)].sval), "-", temp);
     ;}
     break;
 
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 251 "parser.y"
+#line 253 "parser.y"
     {
-        gen_quad("FIELD", (yyvsp[(1) - (2)].sval), "NESTED", "-");
+        char* temp = new_temp();
+        gen_quad("FIELD", (yyvsp[(1) - (2)].sval), "NESTED", temp);
     ;}
     break;
 
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 254 "parser.y"
+#line 257 "parser.y"
     {
-        gen_quad("ALIAS", (yyvsp[(1) - (3)].sval), (yyvsp[(3) - (3)].sval), "-");
+        char* temp = new_temp();
+        gen_quad("ALIAS", (yyvsp[(1) - (3)].sval), (yyvsp[(3) - (3)].sval), temp);
     ;}
     break;
 
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 257 "parser.y"
+#line 261 "parser.y"
     {
-        gen_quad("FIELD_ARGS", (yyvsp[(1) - (4)].sval), "-", "-");
+        char* temp = new_temp();
+        gen_quad("FIELD_ARGS", (yyvsp[(1) - (4)].sval), "-", temp);
     ;}
     break;
 
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 307 "parser.y"
+#line 312 "parser.y"
     {
         if (!add_symbol((yyvsp[(2) - (5)].sval), TYPE_FRAGMENT, line)) {
             semantic_errors++;
         }
-        gen_quad("FRAGMENT", (yyvsp[(2) - (5)].sval), (yyvsp[(4) - (5)].sval), "-");
+        char* temp = new_temp();
+        gen_quad("FRAGMENT", (yyvsp[(2) - (5)].sval), (yyvsp[(4) - (5)].sval), temp);
     ;}
     break;
 
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 317 "parser.y"
+#line 322 "parser.y"
     {
         if (!find_symbol((yyvsp[(2) - (2)].sval), TYPE_FRAGMENT)) {
             fprintf(stderr, "Semantic Error at line %d: Fragment '%s' is referenced but not defined\n", 
                     line, (yyvsp[(2) - (2)].sval));
             semantic_errors++;
         }
-        gen_quad("SPREAD", (yyvsp[(2) - (2)].sval), "-", "-");
+        char* temp = new_temp();
+        gen_quad("SPREAD", (yyvsp[(2) - (2)].sval), "-", temp);
     ;}
     break;
 
 
 
 /* Line 1455 of yacc.c  */
-#line 1689 "parser.tab.c"
+#line 1696 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1897,7 +1904,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 327 "parser.y"
+#line 333 "parser.y"
 
 
 void yyerror(const char *s) {

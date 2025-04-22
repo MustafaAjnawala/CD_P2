@@ -1,0 +1,37 @@
+# Valid GraphQL Query with correct semantic structure
+query GetUserInfo {
+  user {
+    id
+    name
+    email
+    posts {
+      title
+      content
+      comments {
+        text
+        author {
+          name
+        }
+      }
+    }
+  }
+}
+
+fragment UserDetails on User {
+  profilePicture
+  accountCreationDate
+  preferences {
+    theme
+    notifications
+  }
+}
+
+query GetExtendedUserInfo {
+  user {
+    ...UserDetails
+    friends {
+      name
+      mutualConnections
+    }
+  }
+}

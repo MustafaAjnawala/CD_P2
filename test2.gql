@@ -1,0 +1,33 @@
+# Invalid GraphQL Query with semantic errors
+query GetUserData {
+  user {
+    id
+    name
+    # Using an undefined fragment
+    ...ProfileDetails
+    posts {
+      title
+    }
+  }
+}
+
+# Duplicate operation name (semantic error)
+query GetUserData {
+  accounts {
+    username
+    email
+  }
+}
+
+# Reference to undefined fragment
+fragment UserStats on User {
+  activityScore
+  ...ActivityMetrics
+  lastLogin
+}
+
+# Define fragment after it's been used (semantic error)
+fragment ProfileDetails on User {
+  avatar
+  bio
+}

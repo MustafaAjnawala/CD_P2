@@ -4,6 +4,32 @@
 #include <string.h>
 
 int line = 1;
+int first_token = 1;  // Flag to print header
+
+// Function to print table header
+void print_header() {
+    printf("+---------+---------------+--------------------+-----------+\n");
+    printf("| Line No | Token Type    | Lexeme            | Token ID  |\n");
+    printf("+---------+---------------+--------------------+-----------+\n");
+}
+
+// Function to print token in table format
+void print_token(int line, const char* type, const char* lexeme, int token_id) {
+    if (first_token) {
+        print_header();
+        first_token = 0;
+    }
+    printf("| %-7d | %-13s | %-18s | %-9d |\n", line, type, lexeme, token_id);
+}
+
+// Function to print comment in table format
+void print_comment(int line, const char* comment) {
+    if (first_token) {
+        print_header();
+        first_token = 0;
+    }
+    printf("| %-7d | %-13s | %-18s | %-9s |\n", line, "Comment", comment, "-");
+}
 %}
 
 DIGIT   [0-9]
@@ -13,41 +39,41 @@ STRING  \"([^\"]*)\"
 
 %%
 
-"query"         { printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 1\n\n", line, yytext); yylval.sval = strdup(yytext); return QUERY; }
-"mutation"      { printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 2\n\n", line, yytext); yylval.sval = strdup(yytext); return MUTATION; }
-"subscription"  { printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 3\n\n", line, yytext); yylval.sval = strdup(yytext); return SUBSCRIPTION; }
-"fragment"      { printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 4\n\n", line, yytext); yylval.sval = strdup(yytext); return FRAGMENT; }
-"on"            { printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 5\n\n", line, yytext); yylval.sval = strdup(yytext); return ON; }
-"true"          { printf("Line No: %d, Token Type: Literal, Lexeme: %s Token_ID: 1\n\n", line, yytext); yylval.sval = strdup(yytext); return TRUE; }
-"false"         { printf("Line No: %d, Token Type: Literal, Lexeme: %s Token_ID: 2\n\n", line, yytext); yylval.sval = strdup(yytext); return FALSE; }
-"null"          { printf("Line No: %d, Token Type: Literal, Lexeme: %s Token_ID: 3\n\n", line, yytext); yylval.sval = strdup(yytext); return NULL_VAL; }
+"query"         { print_token(line, "Keyword", yytext, 1); yylval.sval = strdup(yytext); return QUERY; }
+"mutation"      { print_token(line, "Keyword", yytext, 2); yylval.sval = strdup(yytext); return MUTATION; }
+"subscription"  { print_token(line, "Keyword", yytext, 3); yylval.sval = strdup(yytext); return SUBSCRIPTION; }
+"fragment"      { print_token(line, "Keyword", yytext, 4); yylval.sval = strdup(yytext); return FRAGMENT; }
+"on"            { print_token(line, "Keyword", yytext, 5); yylval.sval = strdup(yytext); return ON; }
+"true"          { print_token(line, "Literal", yytext, 1); yylval.sval = strdup(yytext); return TRUE; }
+"false"         { print_token(line, "Literal", yytext, 2); yylval.sval = strdup(yytext); return FALSE; }
+"null"          { print_token(line, "Literal", yytext, 3); yylval.sval = strdup(yytext); return NULL_VAL; }
 
-"{"             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 1\n\n", line, yytext); return LBRACE; }
-"}"             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 2\n\n", line, yytext); return RBRACE; }
-"("             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 3\n\n", line, yytext); return LPAREN; }
-")"             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 4\n\n", line, yytext); return RPAREN; }
-"["             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 5\n\n", line, yytext); return LBRACKET; }
-"]"             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 6\n\n", line, yytext); return RBRACKET; }
-":"             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 7\n\n", line, yytext); return COLON; }
-"@"             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 8\n\n", line, yytext); return AT; }
-"!"             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 9\n\n", line, yytext); return BANG; }
-"="             { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 10\n\n", line, yytext); return EQUAL; }
-"..."           { printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 11\n\n", line, yytext); return ELLIPSIS; }
+"{"             { print_token(line, "Symbol", yytext, 1); return LBRACE; }
+"}"             { print_token(line, "Symbol", yytext, 2); return RBRACE; }
+"("             { print_token(line, "Symbol", yytext, 3); return LPAREN; }
+")"             { print_token(line, "Symbol", yytext, 4); return RPAREN; }
+"["             { print_token(line, "Symbol", yytext, 5); return LBRACKET; }
+"]"             { print_token(line, "Symbol", yytext, 6); return RBRACKET; }
+":"             { print_token(line, "Symbol", yytext, 7); return COLON; }
+"@"             { print_token(line, "Symbol", yytext, 8); return AT; }
+"!"             { print_token(line, "Symbol", yytext, 9); return BANG; }
+"="             { print_token(line, "Symbol", yytext, 10); return EQUAL; }
+"..."           { print_token(line, "Symbol", yytext, 11); return ELLIPSIS; }
 
-{ID}            { printf("Line No: %d, Token Type: Identifier, Lexeme: %s\n\n", line, yytext); yylval.sval = strdup(yytext); return IDENTIFIER; }
-
-{STRING}        { printf("Line No: %d, Token Type: Literal, Lexeme: %s\n\n", line, yytext); yylval.sval = strdup(yytext); return STRING_LITERAL; }
-{DIGIT}+        { printf("Line No: %d, Token Type: Literal, Lexeme: %s\n\n", line, yytext); 
-                  yylval.ival = atoi(yytext); return INT_LITERAL; }
-{DIGIT}+"."{DIGIT}+ { printf("Line No: %d, Token Type: Literal, Lexeme: %s\n\n", line, yytext); 
-                  yylval.fval = atof(yytext); return FLOAT_LITERAL; }
+{ID}            { print_token(line, "Identifier", yytext, 0); yylval.sval = strdup(yytext); return IDENTIFIER; }
+{STRING}        { print_token(line, "Literal", yytext, 0); yylval.sval = strdup(yytext); return STRING_LITERAL; }
+{DIGIT}+        { print_token(line, "Literal", yytext, 0); yylval.ival = atoi(yytext); return INT_LITERAL; }
+{DIGIT}+"."{DIGIT}+ { print_token(line, "Literal", yytext, 0); yylval.fval = atof(yytext); return FLOAT_LITERAL; }
 
 [ \t]+          ;  /* Ignore whitespaces */
 \n              { line++; }  /* Increment line number on newline */
-"#".*           { printf("Line No: %d, Comment: %s\n", line, yytext); }  /* Ignore comments but print them */
+"#".*           { print_comment(line, yytext); }  /* Print comments in table format */
 
-.               { printf("Line No: %d, Unknown character: %s\n", line, yytext); }
+.               { printf("Line %d: Unknown character: %s\n", line, yytext); }
 
 %%
 
-int yywrap() { return 1; }
+int yywrap() { 
+    printf("+---------+---------------+--------------------+-----------+\n");
+    return 1; 
+}

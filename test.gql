@@ -1,4 +1,3 @@
-# Valid GraphQL Query with correct semantic structure
 query GetUserInfo {
   user {
     id

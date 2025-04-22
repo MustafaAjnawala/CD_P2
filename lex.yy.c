@@ -419,7 +419,33 @@ char *yytext;
 #include <string.h>
 
 int line = 1;
-#line 423 "lex.yy.c"
+int first_token = 1;  // Flag to print header
+
+// Function to print table header
+void print_header() {
+    printf("+---------+---------------+--------------------+-----------+\n");
+    printf("| Line No | Token Type    | Lexeme            | Token ID  |\n");
+    printf("+---------+---------------+--------------------+-----------+\n");
+}
+
+// Function to print token in table format
+void print_token(int line, const char* type, const char* lexeme, int token_id) {
+    if (first_token) {
+        print_header();
+        first_token = 0;
+    }
+    printf("| %-7d | %-13s | %-18s | %-9d |\n", line, type, lexeme, token_id);
+}
+
+// Function to print comment in table format
+void print_comment(int line, const char* comment) {
+    if (first_token) {
+        print_header();
+        first_token = 0;
+    }
+    printf("| %-7d | %-13s | %-18s | %-9s |\n", line, "Comment", comment, "-");
+}
+#line 449 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -570,10 +596,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 14 "lexer.l"
+#line 40 "lexer.l"
 
 
-#line 577 "lex.yy.c"
+#line 603 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -658,147 +684,145 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 16 "lexer.l"
-{ printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 1\n\n", line, yytext); yylval.sval = strdup(yytext); return QUERY; }
+#line 42 "lexer.l"
+{ print_token(line, "Keyword", yytext, 1); yylval.sval = strdup(yytext); return QUERY; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 17 "lexer.l"
-{ printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 2\n\n", line, yytext); yylval.sval = strdup(yytext); return MUTATION; }
+#line 43 "lexer.l"
+{ print_token(line, "Keyword", yytext, 2); yylval.sval = strdup(yytext); return MUTATION; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 18 "lexer.l"
-{ printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 3\n\n", line, yytext); yylval.sval = strdup(yytext); return SUBSCRIPTION; }
+#line 44 "lexer.l"
+{ print_token(line, "Keyword", yytext, 3); yylval.sval = strdup(yytext); return SUBSCRIPTION; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 19 "lexer.l"
-{ printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 4\n\n", line, yytext); yylval.sval = strdup(yytext); return FRAGMENT; }
+#line 45 "lexer.l"
+{ print_token(line, "Keyword", yytext, 4); yylval.sval = strdup(yytext); return FRAGMENT; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 20 "lexer.l"
-{ printf("Line No: %d, Token Type: Keyword, Lexeme: %s Token_ID: 5\n\n", line, yytext); yylval.sval = strdup(yytext); return ON; }
+#line 46 "lexer.l"
+{ print_token(line, "Keyword", yytext, 5); yylval.sval = strdup(yytext); return ON; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 21 "lexer.l"
-{ printf("Line No: %d, Token Type: Literal, Lexeme: %s Token_ID: 1\n\n", line, yytext); yylval.sval = strdup(yytext); return TRUE; }
+#line 47 "lexer.l"
+{ print_token(line, "Literal", yytext, 1); yylval.sval = strdup(yytext); return TRUE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 22 "lexer.l"
-{ printf("Line No: %d, Token Type: Literal, Lexeme: %s Token_ID: 2\n\n", line, yytext); yylval.sval = strdup(yytext); return FALSE; }
+#line 48 "lexer.l"
+{ print_token(line, "Literal", yytext, 2); yylval.sval = strdup(yytext); return FALSE; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 23 "lexer.l"
-{ printf("Line No: %d, Token Type: Literal, Lexeme: %s Token_ID: 3\n\n", line, yytext); yylval.sval = strdup(yytext); return NULL_VAL; }
+#line 49 "lexer.l"
+{ print_token(line, "Literal", yytext, 3); yylval.sval = strdup(yytext); return NULL_VAL; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 25 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 1\n\n", line, yytext); return LBRACE; }
+#line 51 "lexer.l"
+{ print_token(line, "Symbol", yytext, 1); return LBRACE; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 26 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 2\n\n", line, yytext); return RBRACE; }
+#line 52 "lexer.l"
+{ print_token(line, "Symbol", yytext, 2); return RBRACE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 27 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 3\n\n", line, yytext); return LPAREN; }
+#line 53 "lexer.l"
+{ print_token(line, "Symbol", yytext, 3); return LPAREN; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 28 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 4\n\n", line, yytext); return RPAREN; }
+#line 54 "lexer.l"
+{ print_token(line, "Symbol", yytext, 4); return RPAREN; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 29 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 5\n\n", line, yytext); return LBRACKET; }
+#line 55 "lexer.l"
+{ print_token(line, "Symbol", yytext, 5); return LBRACKET; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 30 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 6\n\n", line, yytext); return RBRACKET; }
+#line 56 "lexer.l"
+{ print_token(line, "Symbol", yytext, 6); return RBRACKET; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 31 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 7\n\n", line, yytext); return COLON; }
+#line 57 "lexer.l"
+{ print_token(line, "Symbol", yytext, 7); return COLON; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 32 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 8\n\n", line, yytext); return AT; }
+#line 58 "lexer.l"
+{ print_token(line, "Symbol", yytext, 8); return AT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 33 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 9\n\n", line, yytext); return BANG; }
+#line 59 "lexer.l"
+{ print_token(line, "Symbol", yytext, 9); return BANG; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 34 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 10\n\n", line, yytext); return EQUAL; }
+#line 60 "lexer.l"
+{ print_token(line, "Symbol", yytext, 10); return EQUAL; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 35 "lexer.l"
-{ printf("Line No: %d, Token Type: Symbol, Lexeme: %s Token_ID: 11\n\n", line, yytext); return ELLIPSIS; }
+#line 61 "lexer.l"
+{ print_token(line, "Symbol", yytext, 11); return ELLIPSIS; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 37 "lexer.l"
-{ printf("Line No: %d, Token Type: Identifier, Lexeme: %s\n\n", line, yytext); yylval.sval = strdup(yytext); return IDENTIFIER; }
+#line 63 "lexer.l"
+{ print_token(line, "Identifier", yytext, 0); yylval.sval = strdup(yytext); return IDENTIFIER; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 39 "lexer.l"
-{ printf("Line No: %d, Token Type: Literal, Lexeme: %s\n\n", line, yytext); yylval.sval = strdup(yytext); return STRING_LITERAL; }
+#line 64 "lexer.l"
+{ print_token(line, "Literal", yytext, 0); yylval.sval = strdup(yytext); return STRING_LITERAL; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 40 "lexer.l"
-{ printf("Line No: %d, Token Type: Literal, Lexeme: %s\n\n", line, yytext); 
-                  yylval.ival = atoi(yytext); return INT_LITERAL; }
+#line 65 "lexer.l"
+{ print_token(line, "Literal", yytext, 0); yylval.ival = atoi(yytext); return INT_LITERAL; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 42 "lexer.l"
-{ printf("Line No: %d, Token Type: Literal, Lexeme: %s\n\n", line, yytext); 
-                  yylval.fval = atof(yytext); return FLOAT_LITERAL; }
+#line 66 "lexer.l"
+{ print_token(line, "Literal", yytext, 0); yylval.fval = atof(yytext); return FLOAT_LITERAL; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 45 "lexer.l"
+#line 68 "lexer.l"
 ;  /* Ignore whitespaces */
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 46 "lexer.l"
+#line 69 "lexer.l"
 { line++; }  /* Increment line number on newline */
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 47 "lexer.l"
-{ printf("Line No: %d, Comment: %s\n", line, yytext); }  /* Ignore comments but print them */
+#line 70 "lexer.l"
+{ print_comment(line, yytext); }  /* Print comments in table format */
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 49 "lexer.l"
-{ printf("Line No: %d, Unknown character: %s\n", line, yytext); }
+#line 72 "lexer.l"
+{ printf("Line %d: Unknown character: %s\n", line, yytext); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 51 "lexer.l"
+#line 74 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 802 "lex.yy.c"
+#line 826 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1684,7 +1708,10 @@ int main()
 	return 0;
 	}
 #endif
-#line 51 "lexer.l"
+#line 74 "lexer.l"
 
 
-int yywrap() { return 1; }
+int yywrap() { 
+    printf("+---------+---------------+--------------------+-----------+\n");
+    return 1; 
+}

@@ -3,6 +3,117 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct {
+    char* op;
+    char* arg1;
+    char* arg2;
+    char* result;
+    int index;
+} Quadruple;
+
+typedef struct {
+    Quadruple* quads;
+    int count;
+} OptimizedQuads;
+
+#define MAX_QUADRUPLES 1000
+Quadruple quad_table[MAX_QUADRUPLES];
+int quad_count = 0;
+int temp_var_count = 0;
+
+char* new_temp() {
+    char* temp = (char*)malloc(10);
+    sprintf(temp, "t%d", temp_var_count++);
+    return temp;
+}
+
+void gen_quad(const char* op, const char* arg1, const char* arg2, const char* result) {
+    if (quad_count >= MAX_QUADRUPLES) {
+        fprintf(stderr, "Quadruple table full\n");
+        return;
+    }
+    quad_table[quad_count].op = strdup(op);
+    quad_table[quad_count].arg1 = arg1 ? strdup(arg1) : strdup("-");
+    quad_table[quad_count].arg2 = arg2 ? strdup(arg2) : strdup("-");
+    quad_table[quad_count].result = result ? strdup(result) : strdup("-");
+    quad_table[quad_count].index = quad_count;
+    quad_count++;
+}
+
+int are_equivalent_quads(Quadruple q1, Quadruple q2) {
+    return (strcmp(q1.op, q2.op) == 0 &&
+            strcmp(q1.arg1, q2.arg1) == 0 &&
+            strcmp(q1.arg2, q2.arg2) == 0);
+}
+
+OptimizedQuads optimize_quadruples() {
+    OptimizedQuads opt;
+    opt.quads = (Quadruple*)malloc(sizeof(Quadruple) * MAX_QUADRUPLES);
+    opt.count = 0;
+    
+    int eliminated = 0;
+    char used_temps[MAX_QUADRUPLES][20] = {0};  // Store used temporary variables
+    
+    opt.quads[opt.count++] = quad_table[0];
+    
+    for (int i = 1; i < quad_count; i++) {
+        int found_common = 0;
+        
+        for (int j = 0; j < i; j++) {
+            if (are_equivalent_quads(quad_table[i], quad_table[j])) {
+                // Common subexpression found
+                found_common = 1;
+                eliminated++;
+                
+                // Use the result of the previous computation
+                if (strcmp(quad_table[i].result, "-") != 0) {
+                    strcpy(used_temps[i], quad_table[j].result);
+                }
+                break;
+            }
+        }
+        
+        if (!found_common) {
+            opt.quads[opt.count] = quad_table[i];
+            opt.count++;
+        }
+    }
+    
+    return opt;
+}
+
+void print_wide_table(const char* title, Quadruple* quads, int count) {
+    printf("\n\n%s:\n", title);
+    printf("+-------+----------------+--------------------+----------------+----------------+\n");
+    printf("| Index | Operator       | Arg1               | Arg2           | Result         |\n");
+    printf("+-------+----------------+--------------------+----------------+----------------+\n");
+    
+    for (int i = 0; i < count; i++) {
+        printf("| %-5d | %-14s | %-19s | %-14s | %-14s |\n",
+            quads[i].index,
+            quads[i].op,
+            quads[i].arg1,
+            quads[i].arg2,
+            quads[i].result);
+    }
+    printf("+-------+----------------+----------------+----------------+----------------+\n");
+}
+
+void print_quadruples() {
+    print_wide_table("Original Intermediate Code (Quadruples)", quad_table, quad_count);
+    
+    OptimizedQuads opt = optimize_quadruples();
+    
+    print_wide_table("Optimized Intermediate Code (After CSE)", opt.quads, opt.count);
+    
+    printf("\nOptimization Statistics:\n");
+    printf("Original quadruples: %d\n", quad_count);
+    printf("Optimized quadruples: %d\n", opt.count);
+    printf("Eliminated expressions: %d\n", quad_count - opt.count);
+    
+    free(opt.quads);
+}
+
 void yyerror(const char *s);
 int yylex();
 extern FILE *yyin;
@@ -90,6 +201,7 @@ document:
             printf("\n\nGraphQL query parsed with %d semantic error(s).\n", semantic_errors);
             printf("Semantic analysis: Document is semantically incorrect.\n");
         }
+        print_quadruples(); 
     }
     ;
 
@@ -114,8 +226,9 @@ operation_definition:
         if (!add_symbol($2, TYPE_OPERATION, line)) {
             semantic_errors++;
         }
+        gen_quad("OPERATION", $1, $2, "-");
     }
-  ;
+    ;
 
 selection_set:
     LBRACE selection_list RBRACE
@@ -132,12 +245,19 @@ selection:
   ;
 
 field:
-    IDENTIFIER                              /* Simple field */
-  | IDENTIFIER selection_set                /* Nested field */
-  | IDENTIFIER COLON IDENTIFIER            /* Aliased field */
-  | IDENTIFIER LPAREN argument_list RPAREN /* Field with arguments */
-  | IDENTIFIER LPAREN argument_list RPAREN selection_set /* Field with arguments and nested selection */
-  ;
+    IDENTIFIER {
+        gen_quad("FIELD", $1, "-", "-");
+    }
+    | IDENTIFIER selection_set {
+        gen_quad("FIELD", $1, "NESTED", "-");
+    }
+    | IDENTIFIER COLON IDENTIFIER {
+        gen_quad("ALIAS", $1, $3, "-");
+    }
+    | IDENTIFIER LPAREN argument_list RPAREN {
+        gen_quad("FIELD_ARGS", $1, "-", "-");
+    }
+    ;
 
 argument_list:
     argument
@@ -188,8 +308,10 @@ fragment_definition:
         if (!add_symbol($2, TYPE_FRAGMENT, line)) {
             semantic_errors++;
         }
+        gen_quad("FRAGMENT", $2, $4, "-");
     }
-  ;
+    ;
+
 
 fragment_spread:
     ELLIPSIS IDENTIFIER {
@@ -198,8 +320,9 @@ fragment_spread:
                     line, $2);
             semantic_errors++;
         }
+        gen_quad("SPREAD", $2, "-", "-");
     }
-  ;
+    ;
 
 %%
 

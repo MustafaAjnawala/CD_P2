@@ -87,10 +87,19 @@ typedef struct {
     int count;
 } OptimizedQuads;
 
+typedef struct {
+    int original_index;
+    char* reason;
+} RemovedQuad;
+
 #define MAX_QUADRUPLES 1000
 Quadruple quad_table[MAX_QUADRUPLES];
 int quad_count = 0;
 int temp_var_count = 0;
+
+#define MAX_REMOVED 1000
+RemovedQuad removed_quads[MAX_REMOVED];
+int removed_count = 0;
 
 char* new_temp() {
     char* temp = (char*)malloc(10);
@@ -121,10 +130,9 @@ OptimizedQuads optimize_quadruples() {
     OptimizedQuads opt;
     opt.quads = (Quadruple*)malloc(sizeof(Quadruple) * MAX_QUADRUPLES);
     opt.count = 0;
+    removed_count = 0;
     
-    int eliminated = 0;
-    char used_temps[MAX_QUADRUPLES][20] = {0};  // Store used temporary variables
-    
+   
     opt.quads[opt.count++] = quad_table[0];
     
     for (int i = 1; i < quad_count; i++) {
@@ -132,14 +140,12 @@ OptimizedQuads optimize_quadruples() {
         
         for (int j = 0; j < i; j++) {
             if (are_equivalent_quads(quad_table[i], quad_table[j])) {
-                // Common subexpression found
-                found_common = 1;
-                eliminated++;
                 
-                // Use the result of the previous computation
-                if (strcmp(quad_table[i].result, "-") != 0) {
-                    strcpy(used_temps[i], quad_table[j].result);
-                }
+                removed_quads[removed_count].original_index = i;
+                removed_quads[removed_count].reason = strdup(quad_table[j].result);
+                removed_count++;
+                
+                found_common = 1;
                 break;
             }
         }
@@ -182,7 +188,30 @@ void print_quadruples() {
     printf("Optimized quadruples: %d\n", opt.count);
     printf("Eliminated expressions: %d\n", quad_count - opt.count);
     
+    if (removed_count > 0) {
+        printf("\nRemoved Quadruples:\n");
+        printf("+-------+----------------+--------------------+----------------+----------------+----------------+\n");
+        printf("| Index | Operator       | Arg1              | Arg2           | Result         | Replaced By    |\n");
+        printf("+-------+----------------+--------------------+----------------+----------------+----------------+\n");
+        
+        for (int i = 0; i < removed_count; i++) {
+            int idx = removed_quads[i].original_index;
+            printf("| %-5d | %-14s | %-18s | %-14s | %-14s | %-14s |\n",
+                quad_table[idx].index,
+                quad_table[idx].op,
+                quad_table[idx].arg1,
+                quad_table[idx].arg2,
+                quad_table[idx].result,
+                removed_quads[i].reason);
+        }
+        printf("+-------+----------------+--------------------+----------------+----------------+----------------+\n");
+    }
+    
+    // Free allocated memory
     free(opt.quads);
+    for (int i = 0; i < removed_count; i++) {
+        free(removed_quads[i].reason);
+    }
 }
 
 void yyerror(const char *s);
@@ -245,7 +274,7 @@ int semantic_errors = 0;
 
 
 /* Line 189 of yacc.c  */
-#line 249 "parser.tab.c"
+#line 278 "parser.tab.c"
 
 /* Enabling traces.  */
 #ifndef YYDEBUG
@@ -305,7 +334,7 @@ typedef union YYSTYPE
 {
 
 /* Line 214 of yacc.c  */
-#line 177 "parser.y"
+#line 206 "parser.y"
 
     char *sval;
     int ival;
@@ -314,7 +343,7 @@ typedef union YYSTYPE
 
 
 /* Line 214 of yacc.c  */
-#line 318 "parser.tab.c"
+#line 347 "parser.tab.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -326,7 +355,7 @@ typedef union YYSTYPE
 
 
 /* Line 264 of yacc.c  */
-#line 330 "parser.tab.c"
+#line 359 "parser.tab.c"
 
 #ifdef short
 # undef short
@@ -625,11 +654,11 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   196,   196,   209,   210,   214,   215,   219,   220,   221,
-     225,   235,   239,   240,   244,   245,   249,   253,   257,   261,
-     268,   269,   273,   277,   278,   279,   280,   281,   282,   283,
-     284,   288,   289,   293,   294,   298,   302,   303,   307,   308,
-     312,   322
+       0,   225,   225,   238,   239,   243,   244,   248,   249,   250,
+     254,   264,   268,   269,   273,   274,   278,   282,   286,   290,
+     297,   298,   302,   306,   307,   308,   309,   310,   311,   312,
+     313,   317,   318,   322,   323,   327,   331,   332,   336,   337,
+     341,   351
 };
 #endif
 
@@ -1574,7 +1603,7 @@ yyreduce:
         case 2:
 
 /* Line 1455 of yacc.c  */
-#line 196 "parser.y"
+#line 225 "parser.y"
     { 
         if (semantic_errors == 0) {
             printf("\n\nGraphQL query parsed successfully.\n");
@@ -1590,28 +1619,28 @@ yyreduce:
   case 7:
 
 /* Line 1455 of yacc.c  */
-#line 219 "parser.y"
+#line 248 "parser.y"
     { (yyval.sval) = "query"; ;}
     break;
 
   case 8:
 
 /* Line 1455 of yacc.c  */
-#line 220 "parser.y"
+#line 249 "parser.y"
     { (yyval.sval) = "mutation"; ;}
     break;
 
   case 9:
 
 /* Line 1455 of yacc.c  */
-#line 221 "parser.y"
+#line 250 "parser.y"
     { (yyval.sval) = "subscription"; ;}
     break;
 
   case 10:
 
 /* Line 1455 of yacc.c  */
-#line 225 "parser.y"
+#line 254 "parser.y"
     {
         if (!add_symbol((yyvsp[(2) - (3)].sval), TYPE_OPERATION, line)) {
             semantic_errors++;
@@ -1624,7 +1653,7 @@ yyreduce:
   case 16:
 
 /* Line 1455 of yacc.c  */
-#line 249 "parser.y"
+#line 278 "parser.y"
     {
         char* temp = new_temp();
         gen_quad("FIELD", (yyvsp[(1) - (1)].sval), "-", temp);
@@ -1634,7 +1663,7 @@ yyreduce:
   case 17:
 
 /* Line 1455 of yacc.c  */
-#line 253 "parser.y"
+#line 282 "parser.y"
     {
         char* temp = new_temp();
         gen_quad("FIELD", (yyvsp[(1) - (2)].sval), "NESTED", temp);
@@ -1644,7 +1673,7 @@ yyreduce:
   case 18:
 
 /* Line 1455 of yacc.c  */
-#line 257 "parser.y"
+#line 286 "parser.y"
     {
         char* temp = new_temp();
         gen_quad("ALIAS", (yyvsp[(1) - (3)].sval), (yyvsp[(3) - (3)].sval), temp);
@@ -1654,7 +1683,7 @@ yyreduce:
   case 19:
 
 /* Line 1455 of yacc.c  */
-#line 261 "parser.y"
+#line 290 "parser.y"
     {
         char* temp = new_temp();
         gen_quad("FIELD_ARGS", (yyvsp[(1) - (4)].sval), "-", temp);
@@ -1664,7 +1693,7 @@ yyreduce:
   case 40:
 
 /* Line 1455 of yacc.c  */
-#line 312 "parser.y"
+#line 341 "parser.y"
     {
         if (!add_symbol((yyvsp[(2) - (5)].sval), TYPE_FRAGMENT, line)) {
             semantic_errors++;
@@ -1677,7 +1706,7 @@ yyreduce:
   case 41:
 
 /* Line 1455 of yacc.c  */
-#line 322 "parser.y"
+#line 351 "parser.y"
     {
         if (!find_symbol((yyvsp[(2) - (2)].sval), TYPE_FRAGMENT)) {
             fprintf(stderr, "Semantic Error at line %d: Fragment '%s' is referenced but not defined\n", 
@@ -1692,7 +1721,7 @@ yyreduce:
 
 
 /* Line 1455 of yacc.c  */
-#line 1696 "parser.tab.c"
+#line 1725 "parser.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1904,7 +1933,7 @@ yyreturn:
 
 
 /* Line 1675 of yacc.c  */
-#line 333 "parser.y"
+#line 362 "parser.y"
 
 
 void yyerror(const char *s) {

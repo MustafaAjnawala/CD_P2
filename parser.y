@@ -16,10 +16,19 @@ typedef struct {
     int count;
 } OptimizedQuads;
 
+typedef struct {
+    int original_index;
+    char* reason;
+} RemovedQuad;
+
 #define MAX_QUADRUPLES 1000
 Quadruple quad_table[MAX_QUADRUPLES];
 int quad_count = 0;
 int temp_var_count = 0;
+
+#define MAX_REMOVED 1000
+RemovedQuad removed_quads[MAX_REMOVED];
+int removed_count = 0;
 
 char* new_temp() {
     char* temp = (char*)malloc(10);
@@ -50,10 +59,9 @@ OptimizedQuads optimize_quadruples() {
     OptimizedQuads opt;
     opt.quads = (Quadruple*)malloc(sizeof(Quadruple) * MAX_QUADRUPLES);
     opt.count = 0;
+    removed_count = 0;
     
-    int eliminated = 0;
-    char used_temps[MAX_QUADRUPLES][20] = {0};  // Store used temporary variables
-    
+   
     opt.quads[opt.count++] = quad_table[0];
     
     for (int i = 1; i < quad_count; i++) {
@@ -61,14 +69,12 @@ OptimizedQuads optimize_quadruples() {
         
         for (int j = 0; j < i; j++) {
             if (are_equivalent_quads(quad_table[i], quad_table[j])) {
-                // Common subexpression found
-                found_common = 1;
-                eliminated++;
                 
-                // Use the result of the previous computation
-                if (strcmp(quad_table[i].result, "-") != 0) {
-                    strcpy(used_temps[i], quad_table[j].result);
-                }
+                removed_quads[removed_count].original_index = i;
+                removed_quads[removed_count].reason = strdup(quad_table[j].result);
+                removed_count++;
+                
+                found_common = 1;
                 break;
             }
         }
@@ -111,7 +117,30 @@ void print_quadruples() {
     printf("Optimized quadruples: %d\n", opt.count);
     printf("Eliminated expressions: %d\n", quad_count - opt.count);
     
+    if (removed_count > 0) {
+        printf("\nRemoved Quadruples:\n");
+        printf("+-------+----------------+--------------------+----------------+----------------+----------------+\n");
+        printf("| Index | Operator       | Arg1              | Arg2           | Result         | Replaced By    |\n");
+        printf("+-------+----------------+--------------------+----------------+----------------+----------------+\n");
+        
+        for (int i = 0; i < removed_count; i++) {
+            int idx = removed_quads[i].original_index;
+            printf("| %-5d | %-14s | %-18s | %-14s | %-14s | %-14s |\n",
+                quad_table[idx].index,
+                quad_table[idx].op,
+                quad_table[idx].arg1,
+                quad_table[idx].arg2,
+                quad_table[idx].result,
+                removed_quads[i].reason);
+        }
+        printf("+-------+----------------+--------------------+----------------+----------------+----------------+\n");
+    }
+    
+    // Free allocated memory
     free(opt.quads);
+    for (int i = 0; i < removed_count; i++) {
+        free(removed_quads[i].reason);
+    }
 }
 
 void yyerror(const char *s);
